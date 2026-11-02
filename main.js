@@ -1,6 +1,7 @@
 import { createTimeline, stagger, utils } from "https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.esm.min.js";
 import { profile, experience, projects, education, skills } from "./content.js";
 import { figures } from "./figures.js";
+import { buildPerson, playPerson } from "./person.js";
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const $ = (sel) => document.querySelector(sel);
@@ -163,6 +164,7 @@ function setupFigures() {
 
 renderContent();
 setupFigures();
+buildPerson($("#buddy"));
 
 const topbar = $("#topbar");
 const onScrollBar = () => topbar.classList.toggle("scrolled", window.scrollY > 8);
@@ -175,4 +177,5 @@ if (!reduceMotion) {
   createTimeline({ defaults: { ease: "outExpo" } })
     .add("#name .char", { opacity: [0, 1], translateY: ["0.6em", 0], duration: 900, delay: stagger(28) }, 100)
     .add(".hero .intro, .hero .role, .hero .actions", { opacity: [0, 1], translateY: [12, 0], duration: 700, delay: stagger(90) }, 500);
+  playPerson($("#buddy"), 600);
 }

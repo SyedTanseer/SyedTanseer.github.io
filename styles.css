@@ -24,7 +24,7 @@
   --bg-art-size: 22px 22px;
   --display-weight: 800;
   --display-case: none;
-  --h1-size: clamp(3.4rem, 10vw, 9rem);
+  --h1-size: clamp(3rem, 8vw, 7.6rem);
   --h1-leading: 0.9;
   --h1-tracking: -0.045em;
   --h-size: 0.92;                   /* multiplier for section/entry headings */
@@ -111,7 +111,7 @@ a:hover { text-decoration-color: var(--flag); }
   margin: clamp(16px, 3vw, 32px) auto 0;
   padding: clamp(36px, 6vw, 80px) var(--gutter) clamp(40px, 6vw, 72px);
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) clamp(180px, 25vw, 330px);
   gap: clamp(24px, 4vw, 56px);
   align-items: center;
 }
@@ -381,3 +381,33 @@ h1 .char { display: inline-block; }
   align-items: start;
 }
 .exp-with-fig .proj-fig { margin: 0; }
+
+/* Waving figure beside the name */
+.buddy { align-self: start; margin-top: clamp(0px, 2vw, 24px); }
+#buddy { width: 100%; height: auto; display: block; overflow: visible; }
+#buddy:focus-visible { outline-offset: 6px; }
+#buddy .p-out { fill: none; stroke: var(--line); stroke-linecap: round; }
+#buddy .p-in { fill: none; stroke: var(--bg-2); stroke-linecap: round; }
+#buddy .p-shape { fill: var(--bg-2); stroke: var(--line); stroke-width: 1.7; stroke-linejoin: round; }
+#buddy .p-line { fill: none; stroke: var(--line); stroke-width: 1.7; stroke-linecap: round; }
+#buddy .p-hair { fill: var(--line); }
+#buddy .p-eye { fill: var(--line); transform-box: fill-box; transform-origin: center; }
+#buddy .p-eyes { transition: transform 0.25s ease-out; }
+#buddy .p-bone { fill: none; stroke: var(--flag); stroke-width: 2; stroke-linecap: round; opacity: 0.95; }
+#buddy .p-kp { fill: var(--flag); stroke: var(--bg); stroke-width: 1.5; transform-box: fill-box; transform-origin: center; }
+#buddy .p-body { transform-box: view-box; transform-origin: 120px 330px; }
+#buddy .p-box { transform-box: fill-box; transform-origin: center; }
+#buddy .p-box .frame { fill: none; stroke: var(--flag); stroke-width: 2.5; }
+#buddy .p-box .chip { fill: var(--flag); }
+#buddy .p-box text { font-family: var(--mono); font-size: 13px; font-weight: 500; fill: var(--flag-ink); }
+@media (max-width: 640px) {
+  .hero { grid-template-columns: minmax(0, 1fr); }
+  .buddy { position: absolute; top: clamp(28px, 8vw, 48px); right: var(--gutter); width: 92px; margin: 0; }
+  h1 { padding-right: 104px; }
+}
+@media (max-width: 900px) {
+  .exp-with-fig { grid-template-columns: 1fr; }
+  .exp-with-fig .proj-fig { max-width: 460px; }
+}
+#buddy .p-lens { fill: rgba(255, 255, 255, 0.35); stroke: var(--line); stroke-width: 2.2; }
+#buddy .p-strand { fill: none; stroke: var(--bg-2); stroke-width: 1.4; stroke-linecap: round; opacity: 0.55; }
