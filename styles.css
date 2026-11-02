@@ -24,7 +24,7 @@
   --bg-art-size: 22px 22px;
   --display-weight: 800;
   --display-case: none;
-  --h1-size: clamp(3.2rem, 7.4vw, 6.6rem);
+  --h1-size: clamp(3.4rem, 10vw, 9rem);
   --h1-leading: 0.9;
   --h1-tracking: -0.045em;
   --h-size: 0.92;                   /* multiplier for section/entry headings */
@@ -111,7 +111,7 @@ a:hover { text-decoration-color: var(--flag); }
   margin: clamp(16px, 3vw, 32px) auto 0;
   padding: clamp(36px, 6vw, 80px) var(--gutter) clamp(40px, 6vw, 72px);
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(24px, 4vw, 56px);
   align-items: center;
 }
@@ -150,9 +150,9 @@ h1 .word { display: inline-block; white-space: nowrap; }
 h1 .char { display: inline-block; }
 
 .intro {
-  font-size: clamp(1.15rem, 1.55vw, 1.35rem);
+  font-size: clamp(1.2rem, 1.9vw, 1.6rem);
   line-height: 1.5;
-  max-width: 34ch;
+  max-width: 40ch;
   margin: 0 0 0.9em;
   text-wrap: pretty;
 }
@@ -176,23 +176,21 @@ h1 .char { display: inline-block; }
 .btn.primary:hover { background: var(--flag-hover); border-color: var(--flag-hover); }
 
 /* ---------- Engine scan ---------- */
-.scan { margin: 0; position: relative; }
-#engine { width: 100%; height: auto; display: block; overflow: visible; filter: drop-shadow(0 0 40px var(--glow)); }
 
-#engine .draw, .illo .draw { fill: none; stroke: var(--line); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
-#engine .draw.thick, .illo .draw.thick { stroke-width: 2.4; }
-#engine .draw.faint { opacity: 0.45; }
+.illo .draw { fill: none; stroke: var(--line); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.illo .draw.thick { stroke-width: 2.4; }
+.illo .draw.faint { opacity: 0.45; }
 .illo .draw.thin { stroke-width: 1; }
-#engine .blade { fill: var(--bg-2); }
-#engine .hubfill { fill: var(--bg); }
-#engine .sweep { stroke: var(--flag); stroke-width: 2; opacity: 0; }
+.illo .blade { fill: var(--bg-2); }
+.illo .hubfill { fill: var(--bg); }
+.illo .sweep { stroke: var(--flag); stroke-width: 2; opacity: 0; }
 
 .box { transform-box: fill-box; transform-origin: center; }
 .box rect.frame { fill: none; stroke: var(--flag); stroke-width: 2.5; }
 .box rect.chip { fill: var(--flag); }
 .box text { font-family: var(--mono); font-size: 13px; font-weight: 500; fill: var(--flag-ink); }
 
-.scan figcaption, .proj-fig figcaption {
+.proj-fig figcaption {
   display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
   margin-top: 14px;
   font-size: 0.85rem;
@@ -360,8 +358,8 @@ h1 .char { display: inline-block; }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
-  .hero { grid-template-columns: 1fr; }
-  .scan { max-width: 540px; width: 100%; justify-self: center; }
+  .exp-with-fig { grid-template-columns: 1fr; }
+  .exp-with-fig .proj-fig { max-width: 460px; }
   .block { grid-template-columns: 1fr; }
   .block h2 { position: static; }
   .about, .proj-body { grid-template-columns: 1fr; }
@@ -374,3 +372,12 @@ h1 .char { display: inline-block; }
   .vf { width: 18px; height: 18px; }
   .vf.tl, .vf.bl { left: 6px; } .vf.tr, .vf.br { right: 6px; }
 }
+
+/* Experience entry with an illustration beside it */
+.exp-with-fig {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 56px);
+  align-items: start;
+}
+.exp-with-fig .proj-fig { margin: 0; }

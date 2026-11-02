@@ -259,4 +259,78 @@ const air = {
   },
 };
 
-export const figures = { screening, air };
+/* ================================================================== */
+/* 3. HAL engine inspection                                            */
+/* ================================================================== */
+
+const EC = 250;
+const ept = (r, deg) => {
+  const a = (deg * Math.PI) / 180;
+  return [fix(EC + r * Math.sin(a)), fix(EC - r * Math.cos(a))];
+};
+const EP = (r, deg) => ept(r, deg).join(" ");
+
+const engine = {
+  label: "Line drawing of a jet engine fan seen from the front, with inspection boxes marking parts to check.",
+  caption: "Illustration of the kind of inspection I built at HAL.",
+  replayLabel: "Run scan again",
+
+  build(svg) {
+    svg.setAttribute("viewBox", "0 0 500 500");
+    const BLADES = 20, STEP = 360 / BLADES;
+    // A swept fan blade: narrow at the root, wide and twisted at the tip.
+    const bladePath = (a) =>
+      [
+        `M ${EP(48, a)}`,
+        `Q ${EP(125, a - 3)} ${EP(198, a + 6)}`,
+        `A 198 198 0 0 1 ${EP(198, a + 19)}`,
+        `Q ${EP(125, a + 13)} ${EP(48, a + 11)}`,
+        `A 48 48 0 0 0 ${EP(48, a)} Z`,
+      ].join(" ");
+    const blades = Array.from({ length: BLADES }, (_, i) => `<path class="draw blade" d="${bladePath(i * STEP)}"/>`).join("");
+    const ticks = Array.from({ length: 72 }, (_, i) => {
+      const a = i * 5, len = i % 6 === 0 ? 9 : 4;
+      const [x1, y1] = ept(214, a), [x2, y2] = ept(214 + len, a);
+      return `<line class="draw faint" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+    }).join("");
+
+    // Inspection boxes (positions assume the fan stops at 0°).
+    const boxes = [
+      { label: "tip_erosion 0.91", x: 350, y: 66, w: 78, h: 82 },
+      { label: "edge_nick 0.84", x: 86, y: 330, w: 66, h: 60 },
+      { label: "spinner_ok 0.97", x: 198, y: 198, w: 104, h: 104 },
+      { label: "liner_dent 0.78", x: 26, y: 112, w: 60, h: 66 },
+    ].map(detection).join("");
+
+    svg.innerHTML = `
+      <g class="casing">
+        <circle class="draw thick" cx="${EC}" cy="${EC}" r="236"/>
+        <circle class="draw" cx="${EC}" cy="${EC}" r="226"/>
+        <circle class="draw faint" cx="${EC}" cy="${EC}" r="204"/>
+      </g>
+      <g class="ticks">${ticks}</g>
+      <g class="fan" style="transform-box: view-box; transform-origin: ${EC}px ${EC}px">
+        ${blades}
+        <circle class="draw thick hubfill" cx="${EC}" cy="${EC}" r="48"/>
+        <circle class="draw" cx="${EC}" cy="${EC}" r="24"/>
+        <path class="draw" d="M ${EC} ${EC - 24} Q ${EC + 30} ${EC - 6} ${EC + 16} ${EC + 20}"/>
+      </g>
+      <line class="sweep" x1="0" y1="0" x2="500" y2="0"/>
+      <g class="flags">${boxes}</g>`;
+  },
+
+  play(svg) {
+    const q = (s) => svg.querySelectorAll(s);
+    utils.set(q(".box"), { opacity: 0 });
+    utils.set(q(".blade"), { opacity: 0 });
+
+    return createTimeline({ defaults: { ease: "outExpo" } })
+      .add(createDrawable(q(".casing .draw, .fan .draw:not(.blade), .ticks .draw")), { draw: ["0 0", "0 1"], duration: 1300, ease: "inOutQuad", delay: stagger(6) }, 0)
+      .add(q(".blade"), { opacity: [0, 1], duration: 500, delay: stagger(25) }, 500)
+      .add(q(".fan"), { rotate: [0, 1080], duration: 3000, ease: "outQuart" }, 750)
+      .add(q(".sweep"), { y1: [10, 490], y2: [10, 490], opacity: [{ to: 0.9, duration: 120 }, { to: 0, delay: 620, duration: 160 }], duration: 900, ease: "inOutSine" }, 3250)
+      .add(q(".box"), { opacity: [0, 1], scale: [1.35, 1], duration: 420, ease: "outBack(1.6)", delay: stagger(140) }, 3900);
+  },
+};
+
+export const figures = { screening, air, engine };

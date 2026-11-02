@@ -19,6 +19,7 @@ export const experience = [
     title: "Intern, Overhaul Division",
     place: "Bangalore, Karnataka",
     when: "June 2026",
+    figure: "engine", // the jet-engine inspection illustration from figures.js
     points: [
       "Developed a YOLO-based vision program that auto-detects aircraft engine parts needing maintenance.",
       "Worked with senior engineers and technicians to turn part-condition criteria into a detection pipeline.",
