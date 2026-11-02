@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Syed Tanseer Shah</title>
+  <meta name="description" content="Syed Tanseer Shah builds computer vision and on-device AI: aircraft engine inspection at HAL, multimodal screening tools and TinyML air-quality forecasting.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='4' width='24' height='24' fill='none' stroke='%23FF5A1F' stroke-width='4'/%3E%3C/svg%3E">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="top" id="topbar">
+    <div class="top-inner">
+      <a class="mark" href="#top" aria-label="Back to top">Tanseer</a>
+      <nav aria-label="Sections">
+        <a href="#experience">Experience</a>
+        <a href="#projects">Projects</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <span class="vf tl" aria-hidden="true"></span><span class="vf tr" aria-hidden="true"></span>
+      <span class="vf bl" aria-hidden="true"></span><span class="vf br" aria-hidden="true"></span>
+      <div class="hero-text">
+        <p class="hud" id="hud"></p>
+        <h1 id="name"></h1>
+        <p class="intro" id="intro"></p>
+        <p class="role" id="role"></p>
+        <div class="actions" id="actions"></div>
+      </div>
+
+      <figure class="scan" aria-labelledby="scan-caption">
+        <svg id="engine" viewBox="0 0 500 500" role="img" aria-label="Line drawing of a jet engine fan seen from the front, with inspection boxes marking parts to check"></svg>
+        <figcaption id="scan-caption">
+          <span>Illustration of the kind of inspection I built at HAL.</span>
+          <button type="button" id="rescan">Run scan again</button>
+        </figcaption>
+      </figure>
+    </section>
+
+    <section class="block" id="experience" aria-labelledby="h-exp">
+      <h2 id="h-exp">Experience</h2>
+      <div class="block-body" id="exp-list"></div>
+    </section>
+
+    <section class="block" id="projects" aria-labelledby="h-proj">
+      <h2 id="h-proj">Projects</h2>
+      <div class="block-body" id="proj-list"></div>
+    </section>
+
+    <section class="block" id="about" aria-labelledby="h-about">
+      <h2 id="h-about">Education &amp; skills</h2>
+      <div class="block-body about">
+        <div id="edu-list"></div>
+        <dl class="skills" id="skill-list"></dl>
+      </div>
+    </section>
+
+    <section class="block contact" id="contact" aria-labelledby="h-contact">
+      <h2 id="h-contact">Contact</h2>
+      <div class="block-body">
+        <p><a class="big-link" id="contact-email" href="#"></a></p>
+        <p class="contact-meta" id="contact-meta"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p id="foot"></p>
+    <p>Animated with Anime.js</p>
+  </footer>
+
+  <noscript>
+    <p class="noscript">This site needs JavaScript to show its content. You can reach me at tanseeracer@gmail.com or see my work at github.com/SyedTanseer.</p>
+  </noscript>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
