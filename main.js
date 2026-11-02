@@ -2,6 +2,7 @@ import { animate, createTimeline, stagger, utils } from "https://cdn.jsdelivr.ne
 import { profile, experience, projects, education, skills, languages } from "./content.js";
 import { figures } from "./figures.js";
 import { buildPerson, playPerson } from "./person.js";
+import { glyphFor, primeGlyph } from "./glyphs.js";
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const $ = (sel) => document.querySelector(sel);
@@ -111,7 +112,11 @@ function renderContent() {
     .join("");
 
   $("#skill-list").innerHTML = skills
-    .map((s) => `<div><dt>${esc(s.group)}</dt><dd>${s.items.map(esc).join(", ")}</dd></div>`)
+    .map(
+      (s) => `<div><dt>${esc(s.group)}</dt><dd><ul class="chips">${s.items
+        .map((it) => `<li class="chip" data-skill="${esc(it)}"><svg class="glyph" viewBox="0 0 32 32" aria-hidden="true">${glyphFor(it).svg}</svg><span>${esc(it)}</span></li>`)
+        .join("")}</ul></dd></div>`
+    )
     .join("");
 
   // Greetings are split into grapheme clusters so Devanagari vowel signs stay attached.
@@ -206,9 +211,34 @@ function setupLanguages() {
 }
 
 /* ------------------------------------------------------------------ */
+/* Skills: each chip appears and its icon does its little motion         */
+/* ------------------------------------------------------------------ */
+
+function setupSkills() {
+  const chips = [...document.querySelectorAll("#skill-list .chip")];
+  chips.forEach((chip) => primeGlyph(chip.querySelector(".glyph"), glyphFor(chip.dataset.skill)));
+  if (reduceMotion || !("IntersectionObserver" in window)) return;
+
+  const playChip = (chip) => glyphFor(chip.dataset.skill).play(chip.querySelector(".glyph"));
+  utils.set(chips, { opacity: 0, translateY: 10 });
+
+  const io = new IntersectionObserver((entries) => {
+    if (!entries.some((e) => e.isIntersecting)) return;
+    io.disconnect();
+    animate(chips, { opacity: [0, 1], translateY: [10, 0], duration: 500, delay: stagger(70), ease: "outExpo" });
+    chips.forEach((chip, i) => setTimeout(() => playChip(chip), 120 + i * 70));
+  }, { threshold: 0.3 });
+  io.observe($("#skill-list"));
+
+  // Hovering a chip plays its motion again.
+  chips.forEach((chip) => chip.addEventListener("pointerenter", () => playChip(chip)));
+}
+
+/* ------------------------------------------------------------------ */
 
 renderContent();
 setupLanguages();
+setupSkills();
 setupFigures();
 buildPerson($("#buddy"));
 
