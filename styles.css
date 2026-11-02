@@ -411,3 +411,41 @@ h1 .char { display: inline-block; }
 }
 #buddy .p-lens { fill: rgba(255, 255, 255, 0.35); stroke: var(--line); stroke-width: 2.2; }
 #buddy .p-strand { fill: none; stroke: var(--bg-2); stroke-width: 1.4; stroke-linecap: round; opacity: 0.55; }
+
+/* Spoken languages */
+.skills-col { display: grid; gap: 28px; align-content: start; }
+.langs { display: grid; gap: 14px; }
+.langs .side-label { margin: 0; }
+.lang {
+  display: grid;
+  grid-template-columns: minmax(7.5em, auto) 1fr auto;
+  grid-template-areas: "greet name note" "greet meter meter";
+  column-gap: 16px; row-gap: 6px;
+  align-items: center;
+}
+.greet {
+  grid-area: greet;
+  font-family: var(--display), "Noto Sans Devanagari", "Noto Sans JP", sans-serif;
+  font-weight: 700;
+  font-size: 1.6rem;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.greet[lang="hi"] { font-family: "Noto Sans Devanagari", var(--display), sans-serif; font-weight: 600; }
+.greet[lang="ja"] { font-family: "Noto Sans JP", var(--display), sans-serif; font-weight: 600; letter-spacing: 0; }
+.greet .g { display: inline-block; }
+.lang-name { grid-area: name; font-weight: 600; }
+.lang-note { grid-area: note; color: var(--muted); font-size: 0.85rem; }
+.meter { grid-area: meter; height: 6px; background: var(--rule); position: relative; overflow: hidden; }
+.meter .fill {
+  position: absolute; inset: 0;
+  width: calc(var(--level) * 100%);
+  background: var(--flag);
+  transform-origin: left center;
+}
+.lang:hover .lang-name { text-decoration: underline; text-decoration-color: var(--flag); text-underline-offset: 0.25em; }
+@media (max-width: 420px) {
+  .greet { font-size: 1.3rem; }
+  .lang { grid-template-columns: minmax(6em, auto) 1fr auto; column-gap: 12px; }
+}

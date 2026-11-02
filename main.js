@@ -1,5 +1,5 @@
-import { createTimeline, stagger, utils } from "https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.esm.min.js";
-import { profile, experience, projects, education, skills } from "./content.js";
+import { animate, createTimeline, stagger, utils } from "https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.esm.min.js";
+import { profile, experience, projects, education, skills, languages } from "./content.js";
 import { figures } from "./figures.js";
 import { buildPerson, playPerson } from "./person.js";
 
@@ -114,6 +114,21 @@ function renderContent() {
     .map((s) => `<div><dt>${esc(s.group)}</dt><dd>${s.items.map(esc).join(", ")}</dd></div>`)
     .join("");
 
+  // Greetings are split into grapheme clusters so Devanagari vowel signs stay attached.
+  const seg = "Segmenter" in Intl ? new Intl.Segmenter() : null;
+  const graphemes = (s) => (seg ? [...seg.segment(s)].map((x) => x.segment) : [...s]);
+  $("#lang-list").innerHTML = `<p class="side-label">Spoken</p>` + languages
+    .map(
+      (l) => `
+      <div class="lang" style="--level:${l.level}">
+        <span class="greet" lang="${esc(l.lang)}" aria-hidden="true">${graphemes(l.greeting).map((g) => `<span class="g">${esc(g)}</span>`).join("")}</span>
+        <span class="lang-name">${esc(l.name)}</span>
+        <span class="lang-note">${esc(l.note)}</span>
+        <span class="meter" aria-hidden="true"><span class="fill"></span></span>
+      </div>`
+    )
+    .join("");
+
   const email = $("#contact-email");
   email.href = `mailto:${profile.email}`;
   email.textContent = profile.email;
@@ -161,8 +176,39 @@ function setupFigures() {
 }
 
 /* ------------------------------------------------------------------ */
+/* Languages: each greeting writes itself, then the fluency bars fill   */
+/* ------------------------------------------------------------------ */
+
+function setupLanguages() {
+  const box = $("#lang-list");
+  if (reduceMotion || !("IntersectionObserver" in window)) return;
+  utils.set("#lang-list .g", { opacity: 0, translateY: "0.5em" });
+  utils.set("#lang-list .fill", { scaleX: 0 });
+
+  const play = () => {
+    const tl = createTimeline({ defaults: { ease: "outExpo" } });
+    box.querySelectorAll(".lang").forEach((row, i) => {
+      tl.add(row.querySelectorAll(".g"), { opacity: [0, 1], translateY: ["0.5em", 0], duration: 600, delay: stagger(90) }, i * 420)
+        .add(row.querySelector(".fill"), { scaleX: [0, 1], duration: 900, ease: "outQuart" }, i * 420 + 250);
+    });
+  };
+  const io = new IntersectionObserver((entries) => {
+    if (entries.some((e) => e.isIntersecting)) { io.disconnect(); play(); }
+  }, { threshold: 0.5 });
+  io.observe(box);
+
+  // Hovering a language writes its greeting again.
+  box.querySelectorAll(".lang").forEach((row) =>
+    row.addEventListener("pointerenter", () =>
+      animate(row.querySelectorAll(".g"), { opacity: [0, 1], translateY: ["0.5em", 0], duration: 500, delay: stagger(70), ease: "outExpo" })
+    )
+  );
+}
+
+/* ------------------------------------------------------------------ */
 
 renderContent();
+setupLanguages();
 setupFigures();
 buildPerson($("#buddy"));
 

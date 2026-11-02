@@ -84,5 +84,11 @@ export const skills = [
     group: "Tools",
     items: ["PyTorch", "TensorFlow Lite Micro", "OpenCV", "Transformers", "Flask", "React", "Node.js", "Docker", "MongoDB"],
   },
-  { group: "Spoken", items: ["Hindi", "English", "Japanese (elementary)"] },
+];
+
+// Spoken languages. `level` is 0–1 and sets how far the bar fills.
+export const languages = [
+  { name: "Hindi", lang: "hi", greeting: "नमस्ते", note: "Native", level: 1 },
+  { name: "English", lang: "en", greeting: "Hello", note: "Native", level: 1 },
+  { name: "Japanese", lang: "ja", greeting: "こんにちは", note: "Elementary", level: 0.3 },
 ];
