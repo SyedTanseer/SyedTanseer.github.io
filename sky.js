@@ -1,5 +1,5 @@
 // The sky behind the page, drawn on one canvas.
-//   Light mode (day):  sketched clouds drifting across the page, and a line-drawn sun.
+//   Light mode (day):  sketched clouds drifting across the page, flocks of birds, and a line-drawn sun.
 //   Dark mode (night): a twinkling parallax starfield, a crescent moon and the odd shooting star.
 // Both the sun and the moon sit in the gap between the name and the waving figure,
 // with a detection tag ("sun 0.98" / "moon 0.97") like the rest of the site.
@@ -24,9 +24,9 @@ export function setupSky() {
   const ctx = canvas.getContext("2d");
 
   let w = 0, h = 0, dpr = 1;
-  let stars = [], shooters = [], clouds = [];
+  let stars = [], shooters = [], clouds = [], flocks = [];
   let raf = 0, running = false, night = isDark();
-  let nextShot = 0, startedAt = 0, lastNow = 0;
+  let nextShot = 0, nextFlock = 0, startedAt = 0, lastNow = 0;
   let orb = null;            // where the sun/moon goes: { x, y, r }
   let sprites = {};          // pre-rendered sun/moon, rebuilt when the theme or size changes
   let mx = 0, my = 0, tmx = 0, tmy = 0; // mouse offset, eased
@@ -122,6 +122,60 @@ export function setupSky() {
       ctx.drawImage(c.sprite, c.x + mx * c.d * 14, y, c.cw, c.ch);
     }
     ctx.globalAlpha = 1;
+  }
+
+  /* ---------------- Birds (day) ---------------- */
+
+  // A small flock in a loose V crosses the sky every so often.
+  function spawnFlock(now) {
+    const dir = Math.random() < 0.5 ? 1 : -1;
+    const d = depthOf();
+    const scale = (0.55 + d * 0.75) * (w < 700 ? 0.8 : 1);
+    const count = 3 + Math.floor(Math.random() * 4);
+    const birds = Array.from({ length: count }, (_, i) => {
+      const rank = Math.ceil(i / 2), side = i % 2 ? -1 : 1; // leader, then alternating wings of the V
+      return {
+        dx: -dir * rank * 22 * scale + (Math.random() - 0.5) * 8 * scale,
+        dy: side * rank * 11 * scale + (Math.random() - 0.5) * 6 * scale,
+        flap: 2.2 + Math.random() * 1.2, // wingbeats per second
+        ph: Math.random() * TAU,
+      };
+    });
+    flocks.push({
+      dir, d, scale, birds,
+      x: dir > 0 ? -80 : w + 80,
+      y: h * (0.08 + Math.random() * 0.42) + window.scrollY * d * 0.12,
+      speed: (34 + d * 46) * (0.85 + Math.random() * 0.3), // px per second
+    });
+    nextFlock = now + 9000 + Math.random() * 7000;
+  }
+
+  function drawBirds(now, dt, scroll) {
+    if (now > nextFlock) spawnFlock(now);
+    const t = now / 1000;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    for (const f of flocks) {
+      f.x += (f.dir * f.speed * dt) / 1000;
+      const baseY = f.y - scroll * f.d * 0.12 + my * f.d * 10;
+      ctx.strokeStyle = `rgba(38, 42, 38, ${0.45 + f.d * 0.4})`;
+      ctx.lineWidth = 1.1 + f.d * 0.5;
+      for (const b of f.birds) {
+        const s = 7 * f.scale;
+        const x = f.x + b.dx + mx * f.d * 14;
+        const y = baseY + b.dy + Math.sin(t * 1.3 + b.ph) * 2 * f.scale; // gentle bob
+        // Flap, then glide: the wing lift eases off for part of each cycle.
+        const beat = Math.sin(t * b.flap * TAU + b.ph);
+        const lift = s * (0.15 + 0.5 * Math.max(beat, -0.4));
+        ctx.beginPath();
+        ctx.moveTo(x - s, y - lift);
+        ctx.quadraticCurveTo(x - s * 0.45, y - lift * 0.2 - s * 0.18, x, y);
+        ctx.quadraticCurveTo(x + s * 0.45, y - lift * 0.2 - s * 0.18, x + s, y - lift);
+        ctx.stroke();
+      }
+    }
+    // Drop flocks once every bird is off screen.
+    flocks = flocks.filter((f) => (f.dir > 0 ? f.x - 160 * f.scale < w + 40 : f.x + 160 * f.scale > -40));
   }
 
   /* ---------------- Stars (night) ---------------- */
@@ -336,6 +390,7 @@ export function setupSky() {
       if (!reduceMotion) drawShooters(now);
     } else {
       drawClouds(dt, scroll);
+      if (!reduceMotion) drawBirds(now, dt, scroll);
       drawOrb(now, scroll);
     }
   }
@@ -353,10 +408,12 @@ export function setupSky() {
     if (themeChanged) {
       sprites = {}; // the moon's disk uses the page background colour
       shooters = [];
+      flocks = [];
     }
     if (themeChanged || !running) {
       startedAt = performance.now();
       nextShot = startedAt + 2500;
+      nextFlock = startedAt + 3000;
     }
     const want = !document.hidden;
     if (want && !running) {
