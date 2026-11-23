@@ -29,7 +29,7 @@
   --fx-flag-box: none;    /* box-shadow glow on orange shapes */
   --fx-text-flag: none;   /* glow on orange text */
   --fx-name: none;        /* halo on the big name */
-  --fx-scan: 0;           /* CRT scanlines + hero scan band */
+  --fx-scan: 0;           /* hero scan band */
   --fx-scan-anim: none;
   --body-bg: transparent;  /* the sky canvas sits behind <body>; <html> carries the page colour */
   --bg-art: none;   /* the sky (sky.js) is the background; panels keep their squared-paper grid */
@@ -133,12 +133,6 @@
 .when, .edu .score, .hud .live { text-shadow: var(--fx-text-flag); }
 h1 .line:first-child { text-shadow: var(--fx-name); }
 
-/* CRT scanlines over the whole page */
-body::after {
-  content: ""; position: fixed; inset: 0; z-index: 30; pointer-events: none;
-  opacity: var(--fx-scan);
-  background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.022) 0 1px, transparent 1px 3px);
-}
 /* A slow scan band sweeping down through the hero */
 .hero::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
