@@ -117,6 +117,45 @@
   color-scheme: dark;
 }
 
+/* Custom cursor (cursor.js): mouse/trackpad only. The native arrow is hidden only once the script has run. */
+html.has-cursor, html.has-cursor * { cursor: none !important; }
+#cursor { position: fixed; inset: 0; z-index: 1000; pointer-events: none; opacity: 0; transition: opacity 0.2s; }
+#cursor.visible { opacity: 1; }
+#cursor .cur-dot {
+  position: absolute; left: -3px; top: -3px;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--flag);
+  filter: var(--fx-flag);
+  transition: opacity 0.15s;
+}
+#cursor.on-target .cur-dot { opacity: 0.35; }
+#cursor .cur-frame {
+  position: absolute; left: 0; top: 0;
+  transform-origin: center;
+  filter: var(--fx-flag);
+}
+#cursor .cur-frame i {
+  position: absolute; width: 9px; height: 9px;
+  border: 0 solid var(--flag);
+}
+#cursor .cur-frame .tl { top: 0; left: 0; border-top-width: 2px; border-left-width: 2px; }
+#cursor .cur-frame .tr { top: 0; right: 0; border-top-width: 2px; border-right-width: 2px; }
+#cursor .cur-frame .bl { bottom: 0; left: 0; border-bottom-width: 2px; border-left-width: 2px; }
+#cursor .cur-frame .br { bottom: 0; right: 0; border-bottom-width: 2px; border-right-width: 2px; }
+#cursor .cur-chip {
+  position: absolute; left: 0; bottom: 100%;
+  margin-bottom: 3px;
+  padding: 1px 6px;
+  font-family: var(--mono); font-size: 11px; font-weight: 500; line-height: 16px;
+  white-space: nowrap;
+  background: var(--flag); color: var(--flag-ink);
+  opacity: 0; transform: translateY(4px);
+  transition: opacity 0.15s, transform 0.2s cubic-bezier(.2, .7, .2, 1);
+}
+#cursor.on-target .cur-chip { opacity: 1; transform: none; }
+#cursor.chip-below .cur-chip { bottom: auto; top: 100%; margin: 3px 0 0; }
+@media (prefers-reduced-motion: reduce) { #cursor .cur-chip { transition: none; } }
+
 /* The sky (sky.js): clouds and sun by day, stars and moon by night, fixed behind everything.
    The page background lives on <html>, so <body> stays transparent to let it show through. */
 #sky {
