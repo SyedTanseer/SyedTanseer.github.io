@@ -119,11 +119,18 @@ export function playPerson(svg, delay = 0) {
   });
 
   const eyes = svg.querySelector(".p-eyes");
-  window.addEventListener("pointermove", (e) => {
+  // At most once per frame, so a fast mouse doesn't force a layout on every event.
+  let mx = 0, my = 0, queued = false;
+  const look = () => {
+    queued = false;
     const r = svg.getBoundingClientRect();
     const cx = r.left + r.width * 0.5, cy = r.top + r.height * 0.27;
-    const dx = e.clientX - cx, dy = e.clientY - cy, d = Math.hypot(dx, dy) || 1;
+    const dx = mx - cx, dy = my - cy, d = Math.hypot(dx, dy) || 1;
     const m = Math.min(1, d / 300) * 2.6;
     eyes.style.transform = `translate(${(dx / d) * m}px, ${(dy / d) * m}px)`;
+  };
+  window.addEventListener("pointermove", (e) => {
+    mx = e.clientX; my = e.clientY;
+    if (!queued) { queued = true; requestAnimationFrame(look); }
   }, { passive: true });
 }

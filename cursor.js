@@ -219,10 +219,19 @@ export function setupCursor() {
 
   const hoverAt = (el) => { hovering = !!el?.closest?.(CLICKABLE); };
 
+  // Coming back into the window: start fresh at the new spot. Without this the cursor would
+  // flash at the point where it left, then streak across the screen with a huge "velocity".
+  function arrive(e) {
+    px = lx = e.clientX; py = ly = e.clientY;
+    vx = vy = 0;
+    trail = [];
+    visible = true;
+  }
+
   window.addEventListener("pointermove", (e) => {
     if (e.pointerType !== "mouse" && e.pointerType !== "pen") return;
+    if (!visible) arrive(e);
     px = e.clientX; py = e.clientY;
-    if (!visible) { visible = true; lx = px; ly = py; }
     hoverAt(e.target);
     kick();
   }, { passive: true });
@@ -242,7 +251,10 @@ export function setupCursor() {
     kick();
   });
   document.documentElement.addEventListener("pointerleave", () => { visible = false; kick(); });
-  document.documentElement.addEventListener("pointerenter", () => { visible = true; kick(); });
+  document.documentElement.addEventListener("pointerenter", (e) => {
+    if (e.pointerType !== "mouse" && e.pointerType !== "pen") return;
+    arrive(e); hoverAt(e.target); kick();
+  });
   document.addEventListener("visibilitychange", kick);
 
   // Scrolling moves content under a still pointer: re-check what it's over.
