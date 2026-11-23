@@ -22,6 +22,27 @@ export function detection({ label, x, y, w, h, align = "start", cls = "", below 
 
 const fix = (n) => +n.toFixed(2);
 
+/** True when the page is showing the dark theme (OS setting or the toggle). */
+export const isDark = () => getComputedStyle(document.documentElement).colorScheme.includes("dark");
+
+/**
+ * How detection tags arrive. Light: they pop in with a little overshoot.
+ * Dark: they flicker on like a HUD booting up.
+ */
+export function boxIn(step = 0, scale = 1.3) {
+  if (!isDark()) {
+    return { opacity: [0, 1], scale: [scale, 1], duration: 420, ease: "outBack(1.6)", delay: stagger(step) };
+  }
+  return {
+    opacity: [
+      { to: 1, duration: 40 }, { to: 0.1, duration: 70 }, { to: 0.9, duration: 40 },
+      { to: 0.3, duration: 90 }, { to: 1, duration: 60 }, { to: 0.7, duration: 50 }, { to: 1, duration: 120 },
+    ],
+    ease: "linear",
+    delay: stagger(step),
+  };
+}
+
 /* ================================================================== */
 /* 1. Multimodal psychiatric pre-screening                             */
 /* ================================================================== */
@@ -137,7 +158,7 @@ const screening = {
       .add(traces, { draw: ["0 0", "0 1"], duration: 2200, ease: "linear" }, 700)
       .add(q(".word"), { opacity: [0, 1], duration: 200, delay: stagger(2200 / 15), ease: "linear" }, 700)
       .add(q(".playhead"), { opacity: 0, duration: 300 }, 2900)
-      .add(q(".box"), { opacity: [0, 1], scale: [1.3, 1], duration: 420, ease: "outBack(1.6)", delay: stagger(160) }, 2700);
+      .add(q(".box"), boxIn(160), 2700);
   },
 };
 
@@ -249,7 +270,7 @@ const air = {
 
     return tl
       .add(q(".fc"), { opacity: [0, 1], scale: [0, 1], duration: 350, delay: stagger(110), ease: "outBack(2)" }, 2300)
-      .add(q(".box"), { opacity: [0, 1], scale: [1.3, 1], duration: 420, ease: "outBack(1.6)" }, 3000)
+      .add(q(".box"), boxIn(), 3000)
       .call(() => svg.querySelector(".relay").classList.add("on"), 3300)
       .add(q(".purifier"), { rotate: [0, 1440], duration: 2600, ease: "outQuad" }, 3300);
   },
@@ -330,7 +351,7 @@ const engine = {
       .add(q(".blade"), { opacity: [0, 1], duration: 500, delay: stagger(25) }, 500)
       .add(q(".fan"), { rotate: [0, 1080], duration: 3000, ease: "outQuart" }, 750)
       .add(q(".sweep"), { y1: [10, 490], y2: [10, 490], opacity: [{ to: 0.9, duration: 120 }, { to: 0, delay: 620, duration: 160 }], duration: 900, ease: "inOutSine" }, 3250)
-      .add(q(".box"), { opacity: [0, 1], scale: [1.35, 1], duration: 420, ease: "outBack(1.6)", delay: stagger(140) }, 3900);
+      .add(q(".box"), boxIn(140, 1.35), 3900);
   },
 };
 
@@ -460,7 +481,7 @@ const connectome = {
       .add(traces, { draw: ["0 0", "0 1"], duration: 3000, ease: "linear" }, 900)
       .add(state, { p: [0, 1], duration: 3000, ease: "linear", onUpdate: () => renderRing(svg, state.p) }, 900)
       .add(q(".playhead"), { opacity: 0, duration: 300 }, 3900)
-      .add(q(".box"), { opacity: [0, 1], scale: [1.3, 1], duration: 420, ease: "outBack(1.6)", delay: stagger(200) }, 3900);
+      .add(q(".box"), boxIn(200), 3900);
   },
 
   rest(svg) {
@@ -585,7 +606,7 @@ const ecosystem = {
       .add(q(".cone, .percept"), { opacity: [0, 1], duration: 500, ease: "outQuad" }, tInv + 1000)
       .add(q(".playhead"), { opacity: 0, duration: 300 }, T0 + SWEEP)
       .add(q(".fc"), { opacity: [0, 1], scale: [0, 1], duration: 350, delay: stagger(110), ease: "outBack(2)" }, T0 + SWEEP)
-      .add(q(".box"), { opacity: [0, 1], scale: [1.3, 1], duration: 420, ease: "outBack(1.6)", delay: stagger(500) }, tInv + 1300);
+      .add(q(".box"), boxIn(500), tInv + 1300);
   },
 };
 

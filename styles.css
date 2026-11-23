@@ -1,6 +1,7 @@
 /* Layout: a technical drawing sheet — dot grid on pale drafting paper, viewfinder-framed hero,
    left-hand display headings, illustrations set in framed panels with an offset shadow.
-   Inspection tags in safety orange. One committed light look. */
+   Inspection tags in safety orange. Light by default; a dark "night sheet" follows the OS setting
+   or the toggle in the top bar (stored as data-theme on <html>). */
 :root {
   --bg: #eff1ec;        /* drafting paper */
   --bg-2: #e4e7e0;      /* fills inside drawings */
@@ -20,6 +21,16 @@
   --chip-ink: #2e332e;
   --glow: transparent;
   --grid: rgba(24, 27, 24, 0.10);
+  --fig-grid: rgba(24, 27, 24, 0.05);   /* squared paper inside illustration panels */
+  --lens: rgba(255, 255, 255, 0.35);    /* glasses on the waving figure */
+  /* Night-vision effects: all switched off in light mode, set in the dark blocks below. */
+  --fx-line: none;        /* phosphor glow on line drawings */
+  --fx-flag: none;        /* LED glow on orange marks */
+  --fx-flag-box: none;    /* box-shadow glow on orange shapes */
+  --fx-text-flag: none;   /* glow on orange text */
+  --fx-name: none;        /* halo on the big name */
+  --fx-scan: 0;           /* CRT scanlines + hero scan band */
+  --fx-scan-anim: none;
   --bg-art: radial-gradient(var(--grid) 1.2px, transparent 1.4px);
   --bg-art-size: 22px 22px;
   --display-weight: 800;
@@ -40,6 +51,102 @@
   --gutter: clamp(16px, 4.5vw, 64px);
   --max: 1280px;
   color-scheme: light;
+}
+
+/* Dark theme: the same sheet at night. Defined twice so it applies both when the OS asks
+   for dark (unless the visitor picked light) and when the visitor picks dark. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131613;
+    --bg-2: #1f241f;
+    --ink: #e7eae4;
+    --ink-2: #c8cdc5;
+    --muted: #9aa39a;
+    --rule: #353b35;
+    --line: #d7dbd3;
+    --flag: #ff6a30;
+    --flag-ink: #131613;
+    --flag-hover: #ff8a5a;
+    --focus: #7aa7ff;
+    --bar-bg: rgba(19, 22, 19, 0.82);
+    --panel-bg: #191d19;
+    --chip-ink: #c8cdc5;
+    --grid: rgba(231, 234, 228, 0.08);
+    --fig-grid: rgba(231, 234, 228, 0.045);
+    --lens: rgba(255, 255, 255, 0.08);
+    --fx-line: drop-shadow(0 0 2.5px rgba(215, 219, 211, 0.35));
+    --fx-flag: drop-shadow(0 0 5px rgba(255, 106, 48, 0.7));
+    --fx-flag-box: 0 0 18px rgba(255, 106, 48, 0.45);
+    --fx-text-flag: 0 0 14px rgba(255, 106, 48, 0.55);
+    --fx-name: 0 0 32px rgba(231, 234, 228, 0.16);
+    --fx-scan: 1;
+    --fx-scan-anim: hero-scan 7s linear infinite;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131613;
+  --bg-2: #1f241f;
+  --ink: #e7eae4;
+  --ink-2: #c8cdc5;
+  --muted: #9aa39a;
+  --rule: #353b35;
+  --line: #d7dbd3;
+  --flag: #ff6a30;
+  --flag-ink: #131613;
+  --flag-hover: #ff8a5a;
+  --focus: #7aa7ff;
+  --bar-bg: rgba(19, 22, 19, 0.82);
+  --panel-bg: #191d19;
+  --chip-ink: #c8cdc5;
+  --grid: rgba(231, 234, 228, 0.08);
+  --fig-grid: rgba(231, 234, 228, 0.045);
+  --lens: rgba(255, 255, 255, 0.08);
+  --fx-line: drop-shadow(0 0 2.5px rgba(215, 219, 211, 0.35));
+  --fx-flag: drop-shadow(0 0 5px rgba(255, 106, 48, 0.7));
+  --fx-flag-box: 0 0 18px rgba(255, 106, 48, 0.45);
+  --fx-text-flag: 0 0 14px rgba(255, 106, 48, 0.55);
+  --fx-name: 0 0 32px rgba(231, 234, 228, 0.16);
+  --fx-scan: 1;
+  --fx-scan-anim: hero-scan 7s linear infinite;
+  color-scheme: dark;
+}
+
+/* ---------- Night-vision effects (inert in light mode: every token above is none/0) ---------- */
+.illo, #buddy { filter: var(--fx-line); }
+.box, .illo .playhead, .illo .act, .illo .packet, .illo .xmark, .illo .percept, .illo .sweep,
+.illo .relay.on, #buddy .p-bone, #buddy .p-kp, #buddy .p-box, .glyph .a, .glyph .fa { filter: var(--fx-flag); }
+.btn.primary, .meter .fill { box-shadow: var(--fx-flag-box); }
+.when, .edu .score, .hud .live { text-shadow: var(--fx-text-flag); }
+h1 .line:first-child { text-shadow: var(--fx-name); }
+
+/* CRT scanlines over the whole page */
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: 30; pointer-events: none;
+  opacity: var(--fx-scan);
+  background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.022) 0 1px, transparent 1px 3px);
+}
+/* A slow scan band sweeping down through the hero */
+.hero::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  opacity: var(--fx-scan);
+  background: linear-gradient(to bottom, transparent, rgba(255, 106, 48, 0.07) 50%, transparent) no-repeat;
+  background-size: 100% 160px;
+  background-position: 0 -160px;
+  animation: var(--fx-scan-anim);
+}
+@keyframes hero-scan {
+  from { background-position: 0 -160px; }
+  to { background-position: 0 calc(100% + 160px); }
+}
+@media (prefers-reduced-motion: reduce) { .hero::after { animation: none; } }
+
+/* Switching theme: the new look opens as a circle growing from the toggle button. */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-new(root) { animation: theme-reveal 0.75s cubic-bezier(.2, .7, .2, 1); }
+@keyframes theme-reveal {
+  from { clip-path: circle(0px at var(--vt-x, 100%) var(--vt-y, 0px)); }
+  to { clip-path: circle(150vmax at var(--vt-x, 100%) var(--vt-y, 0px)); }
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -103,6 +210,29 @@ a:hover { text-decoration-color: var(--flag); }
 .top nav { display: flex; gap: clamp(14px, 2.6vw, 32px); flex-wrap: wrap; }
 .top nav a { text-decoration: none; color: var(--muted); font-size: 0.95rem; transition: color 0.2s; }
 .top nav a:hover { color: var(--ink); }
+.top-right { display: flex; align-items: center; gap: clamp(14px, 2.6vw, 32px); }
+
+/* Theme toggle: a half-filled disc; the filled half swaps sides with the theme. */
+.theme-toggle {
+  flex: none;
+  width: 34px; height: 34px;
+  display: inline-grid; place-items: center;
+  padding: 0;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--rule);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.theme-toggle:hover { border-color: var(--line); }
+.theme-toggle svg { width: 18px; height: 18px; transition: transform 0.4s cubic-bezier(.2,.7,.2,1); }
+.theme-toggle .ring { fill: none; stroke: currentColor; stroke-width: 1.8; }
+.theme-toggle .half { fill: var(--flag); }
+:root[data-theme="dark"] .theme-toggle svg { transform: rotate(180deg); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle svg { transform: rotate(180deg); }
+}
+@media (prefers-reduced-motion: reduce) { .theme-toggle svg { transition: none; } }
 
 /* ---------- Hero ---------- */
 .hero {
@@ -172,7 +302,7 @@ h1 .char { display: inline-block; }
   transition: border-color 0.2s, background 0.2s, color 0.2s;
 }
 .btn:hover { border-color: var(--line); background: var(--bg-2); }
-.btn.primary { background: var(--flag); border-color: var(--flag); color: var(--ink); }
+.btn.primary { background: var(--flag); border-color: var(--flag); color: var(--flag-ink); }
 .btn.primary:hover { background: var(--flag-hover); border-color: var(--flag-hover); }
 
 /* ---------- Engine scan ---------- */
@@ -267,8 +397,8 @@ h1 .char { display: inline-block; }
   position: relative;
   padding: clamp(18px, 3vw, 32px);
   background:
-    linear-gradient(rgba(24, 27, 24, 0.05) 1px, transparent 1px) 0 0 / 20px 20px,
-    linear-gradient(90deg, rgba(24, 27, 24, 0.05) 1px, transparent 1px) 0 0 / 20px 20px,
+    linear-gradient(var(--fig-grid) 1px, transparent 1px) 0 0 / 20px 20px,
+    linear-gradient(90deg, var(--fig-grid) 1px, transparent 1px) 0 0 / 20px 20px,
     var(--panel-bg);
   border: 1px solid var(--rule);
   box-shadow: 6px 6px 0 var(--rule);
@@ -377,8 +507,11 @@ h1 .char { display: inline-block; }
   .proj-side { border-left: 0; padding-left: 0; border-top: 1px solid var(--rule); padding-top: 18px; }
 }
 @media (max-width: 520px) {
-  .top nav { gap: 14px; }
-  .top nav a { font-size: 0.9rem; }
+  .top nav { gap: 12px; flex-wrap: nowrap; }
+  .top nav a { font-size: 0.86rem; }
+  .top-right { gap: 10px; }
+  .mark { font-size: 1.15rem; gap: 8px; }
+  .theme-toggle { width: 30px; height: 30px; }
   .top nav a[href="#about"] { display: none; }
   .vf { width: 18px; height: 18px; }
   .vf.tl, .vf.bl { left: 6px; } .vf.tr, .vf.br { right: 6px; }
@@ -420,7 +553,7 @@ h1 .char { display: inline-block; }
   .exp-with-fig { grid-template-columns: 1fr; }
   .exp-with-fig .proj-fig { max-width: 460px; }
 }
-#buddy .p-lens { fill: rgba(255, 255, 255, 0.35); stroke: var(--line); stroke-width: 2.2; }
+#buddy .p-lens { fill: var(--lens); stroke: var(--line); stroke-width: 2.2; }
 #buddy .p-strand { fill: none; stroke: var(--bg-2); stroke-width: 1.4; stroke-linecap: round; opacity: 0.55; }
 
 /* Spoken languages */

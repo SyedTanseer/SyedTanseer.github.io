@@ -1,6 +1,6 @@
 import { animate, createTimeline, stagger, utils } from "https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.esm.min.js";
 import { profile, experience, projects, education, skills, languages } from "./content.js";
-import { figures } from "./figures.js";
+import { figures, isDark } from "./figures.js";
 import { buildPerson, playPerson } from "./person.js";
 import { glyphFor, primeGlyph } from "./glyphs.js";
 
@@ -242,6 +242,48 @@ setupSkills();
 setupFigures();
 buildPerson($("#buddy"));
 
+/* ------------------------------------------------------------------ */
+/* Theme toggle: follows the OS until the visitor picks one, then remembers it */
+/* ------------------------------------------------------------------ */
+
+// Illustrations currently on screen whose animation isn't already running.
+function visibleIdleFigures() {
+  return [...document.querySelectorAll("svg.illo")].filter((svg) => {
+    const r = svg.getBoundingClientRect();
+    const btn = svg.closest("figure").querySelector(".replay");
+    return r.bottom > 0 && r.top < window.innerHeight && btn && !btn.disabled && !btn.hidden;
+  });
+}
+
+function setupThemeToggle() {
+  const btn = $("#theme-toggle");
+  const root = document.documentElement;
+  const sync = () => btn.setAttribute("aria-label", isDark() ? "Switch to light theme" : "Switch to dark theme");
+
+  const apply = (next) => {
+    root.dataset.theme = next;
+    try { localStorage.setItem("theme", next); } catch (e) { /* private mode: choice lasts this visit only */ }
+    sync();
+  };
+
+  btn.addEventListener("click", () => {
+    const next = isDark() ? "light" : "dark";
+    if (reduceMotion || !document.startViewTransition) return apply(next);
+
+    // The new theme opens as a circle growing out of the toggle button.
+    const r = btn.getBoundingClientRect();
+    root.style.setProperty("--vt-x", `${r.left + r.width / 2}px`);
+    root.style.setProperty("--vt-y", `${r.top + r.height / 2}px`);
+    const vt = document.startViewTransition(() => apply(next));
+
+    // Going dark: drawings on screen boot up again in HUD style.
+    if (next === "dark") vt.finished.then(() => visibleIdleFigures().forEach((svg) => svg.closest("figure").querySelector(".replay").click()));
+  });
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", sync);
+  sync();
+}
+setupThemeToggle();
+
 const topbar = $("#topbar");
 const onScrollBar = () => topbar.classList.toggle("scrolled", window.scrollY > 8);
 window.addEventListener("scroll", onScrollBar, { passive: true });
@@ -249,9 +291,20 @@ onScrollBar();
 
 // Page-load moment: the name sets itself letter by letter.
 if (!reduceMotion) {
-  utils.set("#name .char", { opacity: 0, translateY: "0.6em" });
+  // Light: letters rise into place. Dark: they flicker on like a neon sign, from the middle out.
+  const nameIn = isDark()
+    ? {
+        opacity: [
+          { to: 1, duration: 50 }, { to: 0.15, duration: 70 }, { to: 0.85, duration: 50 },
+          { to: 0.3, duration: 110 }, { to: 1, duration: 60 }, { to: 0.6, duration: 60 }, { to: 1, duration: 300 },
+        ],
+        ease: "linear",
+        delay: stagger(45, { from: "center" }),
+      }
+    : { opacity: [0, 1], translateY: ["0.6em", 0], duration: 900, delay: stagger(28) };
+  utils.set("#name .char", isDark() ? { opacity: 0 } : { opacity: 0, translateY: "0.6em" });
   createTimeline({ defaults: { ease: "outExpo" } })
-    .add("#name .char", { opacity: [0, 1], translateY: ["0.6em", 0], duration: 900, delay: stagger(28) }, 100)
+    .add("#name .char", nameIn, 100)
     .add(".hero .intro, .hero .role, .hero .actions", { opacity: [0, 1], translateY: [12, 0], duration: 700, delay: stagger(90) }, 500);
   playPerson($("#buddy"), 600);
 }

@@ -1,6 +1,7 @@
 // The waving figure next to the name: a line-drawn person with a pose-estimation
 // skeleton (keypoints + bones) on top, like the output of a pose model.
 import { animate, createTimeline, stagger, utils, spring } from "https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.esm.min.js";
+import { boxIn } from "./figures.js";
 
 // Joint positions in the drawing (viewBox units).
 const J = {
@@ -108,7 +109,7 @@ export function playPerson(svg, delay = 0) {
     .add(q(".p-body"), { opacity: [0, 1], translateY: [40, 0], scale: [0.55, 1], ease: spring({ stiffness: 140, damping: 11 }) }, 0)
     .add(q(".p-kp"), { opacity: [0, 1], scale: [0, 1], duration: 300, ease: "outBack(2.5)", delay: stagger(45) }, 650)
     .add(q(".p-bone"), { opacity: [0, 0.95], duration: 400, ease: "outQuad" }, 900)
-    .add(q(".p-box"), { opacity: [0, 1], scale: [1.15, 1], duration: 420, ease: "outBack(1.6)" }, 1300)
+    .add(q(".p-box"), boxIn(0, 1.15), 1300)
     .call(() => waveForever(svg), 1500);
 
   // Afterwards: blink every few seconds and let the eyes follow the pointer.
