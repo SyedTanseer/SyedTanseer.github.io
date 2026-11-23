@@ -31,6 +31,7 @@
   --fx-name: none;        /* halo on the big name */
   --fx-scan: 0;           /* CRT scanlines + hero scan band */
   --fx-scan-anim: none;
+  --body-bg: transparent;  /* the sky canvas sits behind <body>; <html> carries the page colour */
   --bg-art: radial-gradient(var(--grid) 1.2px, transparent 1.4px);
   --bg-art-size: 22px 22px;
   --display-weight: 800;
@@ -116,13 +117,12 @@
   color-scheme: dark;
 }
 
-/* Starry night (stars.js): fixed behind everything, only shown in dark mode. */
-#stars {
+/* The sky (sky.js): clouds and sun by day, stars and moon by night, fixed behind everything.
+   The page background lives on <html>, so <body> stays transparent to let it show through. */
+#sky {
   position: fixed; inset: 0; z-index: -1;
   width: 100%; height: 100%;
   pointer-events: none;
-  opacity: var(--fx-scan);
-  transition: opacity 0.6s;
 }
 
 /* ---------- Night-vision effects (inert in light mode: every token above is none/0) ---------- */

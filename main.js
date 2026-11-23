@@ -3,7 +3,7 @@ import { profile, experience, projects, education, skills, languages } from "./c
 import { figures, isDark } from "./figures.js";
 import { buildPerson, playPerson } from "./person.js";
 import { glyphFor, primeGlyph } from "./glyphs.js";
-import { setupStars } from "./stars.js";
+import { setupSky } from "./sky.js";
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const $ = (sel) => document.querySelector(sel);
@@ -284,7 +284,7 @@ function setupThemeToggle() {
   sync();
 }
 setupThemeToggle();
-setupStars();
+setupSky();
 
 const topbar = $("#topbar");
 const onScrollBar = () => topbar.classList.toggle("scrolled", window.scrollY > 8);
