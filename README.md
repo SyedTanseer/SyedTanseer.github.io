@@ -10,7 +10,7 @@ A static portfolio site. Plain HTML/CSS/JS, animated with [Anime.js](https://ani
 | `content.js` | **All the text** — name, intro, experience, projects, education, skills. Edit this to change what the site says. |
 | `styles.css` | Colours, type and layout. Colours are variables at the top. |
 | `main.js` | Renders `content.js` into the page and runs the name animation. |
-| `figures.js` | The illustrations (HAL engine scan, screening timeline, air-quality board) and their animations. |
+| `figures.js` | The illustrations (HAL engine scan, connectome ring, ecosystem invasion, screening timeline, air-quality board) and their animations. |
 | `resume.pdf` | Linked from the "Résumé (PDF)" button — replace it with your latest version (same filename). |
 | `.nojekyll` | Tells GitHub Pages to serve files as-is. |
 
@@ -58,4 +58,4 @@ then open http://localhost:8000. (Or use the "Live Server" extension in VS Code.
 
 ## The illustrations
 
-Each drawing lives in `figures.js` (`engine`, `screening`, `air`) and is attached to an entry in `content.js` with `figure: "<name>"`. Remove that line to hide a drawing. Each one animates the first time it scrolls into view and has a replay button. Visitors who have "reduce motion" turned on see the finished drawing with no animation.
+Each drawing lives in `figures.js` (`engine`, `connectome`, `ecosystem`, `screening`, `air`) and is attached to an entry in `content.js` with `figure: "<name>"`. Remove that line to hide a drawing. Each one animates the first time it scrolls into view and has a replay button. Visitors who have "reduce motion" turned on see the finished drawing with no animation.

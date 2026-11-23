@@ -312,6 +312,17 @@ h1 .char { display: inline-block; }
 .illo .relay { transition: fill 0.3s; }
 .illo .relay.on { fill: var(--flag); stroke: var(--flag); }
 .illo .relay.on + .lbl { fill: var(--flag-ink); }
+/* Connectome ring */
+.illo .nrn { fill: var(--bg); transform-box: fill-box; transform-origin: center; }
+.illo .act { fill: var(--flag); }
+.illo .xmark { fill: none; stroke: var(--flag); stroke-width: 2.5; stroke-linecap: round; }
+.illo .true-trace, .illo .legend-true { stroke: var(--muted); }
+/* Ecosystem */
+.illo .pop { transform-box: fill-box; transform-origin: center; }
+.illo .critfill { fill: var(--bg-2); }
+.illo .eye { fill: var(--line); }
+.illo .cone { fill: var(--flag); fill-opacity: 0.12; stroke: var(--flag); stroke-width: 1; stroke-dasharray: 3 4; }
+.illo .percept { stroke: var(--flag); stroke-width: 1.5; stroke-dasharray: 4 4; }
 
 /* Education + skills */
 .about { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 4vw, 64px); }
