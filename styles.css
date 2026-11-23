@@ -32,7 +32,7 @@
   --fx-scan: 0;           /* CRT scanlines + hero scan band */
   --fx-scan-anim: none;
   --body-bg: transparent;  /* the sky canvas sits behind <body>; <html> carries the page colour */
-  --bg-art: radial-gradient(var(--grid) 1.2px, transparent 1.4px);
+  --bg-art: none;   /* the sky (sky.js) is the background; panels keep their squared-paper grid */
   --bg-art-size: 22px 22px;
   --display-weight: 800;
   --display-case: none;
