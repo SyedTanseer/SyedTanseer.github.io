@@ -36,7 +36,7 @@ function figureMarkup(key) {
   if (!fig) return "";
   return `<figure class="proj-fig">
       <svg class="illo" data-figure="${esc(key)}" role="img" aria-label="${esc(fig.label)}"></svg>
-      <figcaption><span>${esc(fig.caption)}</span><button type="button" class="replay">${esc(fig.replayLabel || "Replay")}</button></figcaption>
+      <figcaption><span>${esc(fig.caption)}</span></figcaption>
     </figure>`;
 }
 
@@ -144,41 +144,68 @@ function renderContent() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Illustrations: draw now, animate once when scrolled into view       */
+/* Looping: everything replays on a cycle, but only while it's on screen */
 /* ------------------------------------------------------------------ */
+
+// Tracks which elements are on screen; `whenVisible(el)` resolves once el is (or already is).
+const shown = new Set();
+const waiters = new Map();
+const seen = "IntersectionObserver" in window
+  ? new IntersectionObserver((entries) => entries.forEach((e) => {
+      if (e.isIntersecting) {
+        shown.add(e.target);
+        (waiters.get(e.target) || []).forEach((fn) => fn());
+        waiters.delete(e.target);
+      } else shown.delete(e.target);
+    }), { threshold: 0.3 })
+  : null;
+const watch = (el) => seen?.observe(el);
+const whenVisible = (el) =>
+  !seen || shown.has(el) ? Promise.resolve() : new Promise((res) => waiters.set(el, [...(waiters.get(el) || []), res]));
+const wait = (ms) => new Promise((res) => setTimeout(res, ms));
+// Also wait while the tab is in the background, so loops don't pile up.
+const tabVisible = () => document.hidden ? new Promise((res) => document.addEventListener("visibilitychange", function f() {
+  if (!document.hidden) { document.removeEventListener("visibilitychange", f); res(); }
+})) : Promise.resolve();
+
+/* ------------------------------------------------------------------ */
+/* Illustrations: play, hold, fade out, play again, forever             */
+/* ------------------------------------------------------------------ */
+
+const HOLD = 2600, FADE = 450;
+const restarters = new Map(); // svg -> () => restart now (used by the theme switch)
 
 function setupFigures() {
   document.querySelectorAll("svg.illo").forEach((svg) => {
     const fig = figures[svg.dataset.figure];
     fig.build(svg);
-    const btn = svg.closest("figure").querySelector(".replay");
+    if (reduceMotion) return fig.rest?.(svg);
+    watch(svg);
+    if (seen) svg.style.opacity = 0; // hidden until its first run draws it in
 
-    if (reduceMotion) {
-      fig.rest?.(svg);
-      btn.hidden = true;
-      return;
-    }
-
-    const play = () => {
-      btn.disabled = true;
-      fig.play(svg).then(() => {
-        btn.disabled = false;
+    let run = 0; // bumped to cancel a pending cycle
+    async function cycle(id) {
+      await whenVisible(svg);
+      while (id === run) {
+        await tabVisible();
+        const tl = fig.play(svg);
+        requestAnimationFrame(() => (svg.style.opacity = 1)); // show it once the first frame (blank) has rendered
+        await tl;
+        if (id !== run) return;
         fig.rest?.(svg);
-      });
-    };
-    btn.addEventListener("click", play);
-
-    if (!("IntersectionObserver" in window)) return fig.rest?.(svg);
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          io.disconnect();
-          play();
-        }
-      },
-      { threshold: 0.45 }
-    );
-    io.observe(svg);
+        await wait(HOLD);
+        await whenVisible(svg);
+        await tabVisible();
+        if (id !== run) return;
+        await animate(svg, { opacity: [1, 0], duration: FADE, ease: "inQuad" });
+      }
+    }
+    restarters.set(svg, async () => {
+      const id = ++run;
+      await animate(svg, { opacity: 0, duration: 200, ease: "inQuad" });
+      if (id === run) cycle(id);
+    });
+    cycle(run);
   });
 }
 
@@ -199,10 +226,23 @@ function setupLanguages() {
         .add(row.querySelector(".fill"), { scaleX: [0, 1], duration: 900, ease: "outQuart" }, i * 420 + 250);
     });
   };
-  const io = new IntersectionObserver((entries) => {
-    if (entries.some((e) => e.isIntersecting)) { io.disconnect(); play(); }
-  }, { threshold: 0.5 });
-  io.observe(box);
+  const rows = [...box.querySelectorAll(".lang")];
+  const rewrite = (row) =>
+    createTimeline()
+      .add(row.querySelectorAll(".g"), { opacity: [1, 0], translateY: [0, "-0.4em"], duration: 260, delay: stagger(30), ease: "inQuad" })
+      .add(row.querySelectorAll(".g"), { opacity: [0, 1], translateY: ["0.5em", 0], duration: 600, delay: stagger(90), ease: "outExpo" })
+      .add(row.querySelector(".fill"), { scaleX: [1, 0.15, 1], duration: 1100, ease: "inOutQuart" }, 0);
+  watch(box);
+  (async () => {
+    await whenVisible(box);
+    play();
+    await wait(rows.length * 420 + 2500);
+    for (let i = 0; ; i = (i + 1) % rows.length) { // then rewrite them one by one, round and round
+      await whenVisible(box); await tabVisible();
+      await rewrite(rows[i]);
+      await wait(1600);
+    }
+  })();
 
   // Hovering a language writes its greeting again.
   box.querySelectorAll(".lang").forEach((row) =>
@@ -224,13 +264,20 @@ function setupSkills() {
   const playChip = (chip) => glyphFor(chip.dataset.skill).play(chip.querySelector(".glyph"));
   utils.set(chips, { opacity: 0, translateY: 10 });
 
-  const io = new IntersectionObserver((entries) => {
-    if (!entries.some((e) => e.isIntersecting)) return;
-    io.disconnect();
+  const list = $("#skill-list");
+  watch(list);
+  (async () => {
+    await whenVisible(list);
     animate(chips, { opacity: [0, 1], translateY: [10, 0], duration: 500, delay: stagger(70), ease: "outExpo" });
     chips.forEach((chip, i) => setTimeout(() => playChip(chip), 120 + i * 70));
-  }, { threshold: 0.3 });
-  io.observe($("#skill-list"));
+    await wait(120 + chips.length * 70 + 1800);
+    for (let i = 0; ; i = (i + 1) % chips.length) { // then the icons take turns, one after another
+      await whenVisible(list); await tabVisible();
+      playChip(chips[i]);
+      animate(chips[i], { translateY: [0, -3, 0], duration: 500, ease: "inOutSine" });
+      await wait(650);
+    }
+  })();
 
   // Hovering a chip plays its motion again.
   chips.forEach((chip) => chip.addEventListener("pointerenter", () => playChip(chip)));
@@ -247,15 +294,6 @@ buildPerson($("#buddy"));
 /* ------------------------------------------------------------------ */
 /* Theme toggle: follows the OS until the visitor picks one, then remembers it */
 /* ------------------------------------------------------------------ */
-
-// Illustrations currently on screen whose animation isn't already running.
-function visibleIdleFigures() {
-  return [...document.querySelectorAll("svg.illo")].filter((svg) => {
-    const r = svg.getBoundingClientRect();
-    const btn = svg.closest("figure").querySelector(".replay");
-    return r.bottom > 0 && r.top < window.innerHeight && btn && !btn.disabled && !btn.hidden;
-  });
-}
 
 function setupThemeToggle() {
   const btn = $("#theme-toggle");
@@ -279,7 +317,7 @@ function setupThemeToggle() {
     const vt = document.startViewTransition(() => apply(next));
 
     // Going dark: drawings on screen boot up again in HUD style.
-    if (next === "dark") vt.finished.then(() => visibleIdleFigures().forEach((svg) => svg.closest("figure").querySelector(".replay").click()));
+    if (next === "dark") vt.finished.then(() => restarters.forEach((restart, svg) => shown.has(svg) && restart()));
   });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", sync);
   sync();
@@ -311,4 +349,25 @@ if (!reduceMotion) {
     .add("#name .char", nameIn, 100)
     .add(".hero .intro, .hero .role, .hero .actions", { opacity: [0, 1], translateY: [12, 0], duration: 700, delay: stagger(90) }, 500);
   playPerson($("#buddy"), 600);
+
+  // Then every few seconds a pass runs through the name: a wave by day, a neon stutter by night.
+  const hero = $("#name");
+  watch(hero);
+  (async () => {
+    await wait(5000);
+    for (;;) {
+      await whenVisible(hero); await tabVisible();
+      const chars = hero.querySelectorAll(".char");
+      if (isDark()) {
+        const pick = [...chars].filter(() => Math.random() < 0.3);
+        await animate(pick, {
+          opacity: [{ to: 0.2, duration: 60 }, { to: 1, duration: 50 }, { to: 0.4, duration: 80 }, { to: 1, duration: 120 }],
+          ease: "linear", delay: stagger(40),
+        });
+      } else {
+        await animate(chars, { translateY: [0, "-0.12em", 0], duration: 700, delay: stagger(35), ease: "inOutSine" });
+      }
+      await wait(5500);
+    }
+  })();
 }
